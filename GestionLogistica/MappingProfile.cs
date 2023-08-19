@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GestionLogistica.Models;
+using GestionLogistica.Models.DTOs;
 using GestionLogistica.Models.ViewModels;
 
 namespace GestionLogistica
@@ -8,14 +9,21 @@ namespace GestionLogistica
     {
         public MappingProfile()
         {
-            CreateMap<EquipoComputoRequest, Equipo>(); // POST
-            CreateMap<Equipo, EquipoComputoRequest>(); // GET
 
-            CreateMap<EmpresaRequest, Empresa>(); // POST
-            CreateMap<Empresa, EmpresaRequest>(); // GET
+            CreateMap<EquipoDTO, Equipo>(); // POST
+            CreateMap<Equipo, EquipoDTO>(); // GET
 
-            CreateMap<GestionEnvioRequest, Gestionenvio>(); // POST
-            CreateMap<Gestionenvio, GestionEnvioRequest>(); // GET
+            CreateMap<EmpresaDTO, Empresa>(); // POST
+            CreateMap<Empresa, EmpresaDTO>(); // GET
+
+            CreateMap<GestionEnvioDTO, Gestionenvio>(); // POST
+            CreateMap<Gestionenvio, GestionEnvioDTO>(); // GET
+
+            CreateMap<ClienteDTO, Cliente>(); // POST
+            CreateMap<Cliente, ClienteDTO>(); // GET
+
+            CreateMap<UsuarioDTO, Usuario>(); // POST
+            CreateMap<Usuario, UsuarioDTO>(); // GET
         }
     }
 }

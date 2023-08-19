@@ -16,8 +16,13 @@ namespace GestionLogistica.Models
         public string Modelo { get; set; } = null!;
         public string Cpu { get; set; } = null!;
         public string Ram { get; set; } = null!;
-        public bool? CargadorEquipo { get; set; }
+        public bool CargadorEquipo { get; set; }
+        public int EmpresaId { get; set; }
+        public string? Detalles { get; set; }
+        public string Estado { get; set; }
+        public string? Propietario { get; set; }
 
+        public virtual Empresa? Empresa { get; set; }
         public virtual ICollection<Gestionenvio> Gestionenvios { get; set; }
     }
 }

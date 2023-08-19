@@ -1,4 +1,3 @@
-using GestionLogistica.Models;
 using AutoMapper;
 using GestionLogistica;
 using GestionLogistica.Common;
@@ -6,14 +5,28 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using GestionLogistica.Services;
+using Microsoft.EntityFrameworkCore;
+using GestionLogistica.Models;
+using GestionLogistica.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+//1 - Inyección ConexiónDB de AppSettings
+builder.Services.AddSqlServer<GestionLogisticaContext>(builder.Configuration.GetConnectionString("GestionLogisticaSQLConnection"));
 
-//1 - Inyección ContextoDB
-builder.Services.AddDbContext<GestionLogisticaContext>(ServiceLifetime.Scoped);
+
+//Service Layer
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<EmpresaService>();
+builder.Services.AddScoped<EquipoService>();
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<GestionEnvioService>();
+builder.Services.AddScoped<UsuarioService>();
+
 
 //2 - CORS
 builder.Services.AddCors(options =>
@@ -36,7 +49,15 @@ IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper); //Mapeo mismo para todos los que soliciten durante la ejecucion de la app.
 builder.Services.AddMvc();
 
-builder.Services.AddScoped<IUserService, UserService>();
+
+/*
+var appSettingsSectionConnection = builder.Configuration.GetSection("ConnectionStrings");
+builder.Services.Configure<AppSettings>(appSettingsSectionConnection);
+var appSettingsConnection = appSettingsSectionConnection.Get<AppSettings>().GestionConnection;
+//var connection = appSettingsConnection.GestionConnection;
+builder.Services.AddSqlServer<GestionLogisticaContext>(appSettingsConnection);
+*/
+
 
 //4 - JWT 
 // Configurar sección de configuración "AppSettings" del archivo de configuración

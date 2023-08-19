@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GestionLogistica.Models.ViewModels
+namespace GestionLogistica.Models.DTOs
 {
-    public class ClienteRequest
+    public class ClienteDTO
     {
         [Required]
         public int ClienteId { get; set; }
 
         [Required]
-        public string NombreCliente { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
 
         [Required]
         public string Direccion { get; set; } = string.Empty;
@@ -20,6 +20,6 @@ namespace GestionLogistica.Models.ViewModels
         public string Correo { get; set; } = string.Empty;
 
         [Required]
-        public int IdEmpresa { get; set; }
+        public int EmpresaId { get; set; }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GestionLogistica.Models.ViewModels
+namespace GestionLogistica.Models.DTOs
 {
-    public class AuthRequest
+    public class AuthDTO
     {
         [Required]
         public string Email { get; set; }

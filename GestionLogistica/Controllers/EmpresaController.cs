@@ -1,152 +1,113 @@
 ﻿using AutoMapper;
 using GestionLogistica.Models;
+using GestionLogistica.Models.DTOs;
 using GestionLogistica.Models.Respuesta;
 using GestionLogistica.Models.ViewModels;
+using GestionLogistica.Services;
+using GestionLogistica.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestionLogistica.Controllers
-{
+{ 
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class EmpresaController : ControllerBase
     {
         private readonly GestionLogisticaContext _db;
         private readonly IMapper _mapper;
+        private readonly EmpresaService _empresaService;
 
-        public EmpresaController(GestionLogisticaContext db, IMapper mapper)
+        public EmpresaController(GestionLogisticaContext db, IMapper mapper, EmpresaService empresaService)
         {
             _db = db;
             _mapper = mapper;
+            _empresaService = empresaService;
         }
 
         [HttpGet]
-        public IActionResult ObtenerEmpresas() 
+        [ProducesResponseType(typeof(Respuesta), StatusCodes.Status200OK)]
+        public async Task<ActionResult<Respuesta>> Get()
         {
             Respuesta respuesta = new Respuesta();
-            try
-            {
-                var listaEmpresas = _db.Empresas.ToList();
-                if(listaEmpresas != null)
-                {
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Empresas encontradas correctamente";
-                    respuesta.Data = listaEmpresas;
-                }
-            }
-            catch (Exception ex)
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al buscar las empresas: " + ex.Message;
-                return BadRequest();
-            }
+            respuesta = await _empresaService.GetAll();
             return Ok(respuesta);
         }
 
         [HttpGet("{id}")]
-        public IActionResult EmpresaPorId(int id)
+        [ProducesResponseType(typeof(Respuesta), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Respuesta), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Empresa>> GetById(int id)
         {
             Respuesta respuesta = new Respuesta();
-            try
-            {
-                Empresa empresa = _db.Empresas.Find(id);
-                if(empresa != null)
-                {
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Empresa encontrada con éxito";
-                    respuesta.Data = empresa;
-                }
-                else
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "Empresa no encontrada";
-                }
-            }
-            catch (Exception ex)
+         /* if (!IsValidId(id))
             {
                 respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al buscar la empresa: " + ex.Message;
-                return BadRequest();
-            }
-            return Ok(respuesta);
+                respuesta.Mensaje = "El ID no puede ser nulo.";
+                return BadRequest(respuesta);
+            }*/
+            respuesta.Mensaje = "Empresa encontrada con éxito";
+            respuesta.Exito = 1;
+            var empresa = await _empresaService.GetById(id);
+            return Ok(empresa);
         }
 
         [HttpPost]
-        public IActionResult CrearEmpresa(EmpresaRequest oModel)
+        public async Task<ActionResult<Respuesta>> Crear(EmpresaDTO nuevaEmpresa)
         {
             Respuesta respuesta = new Respuesta();
-            try
+            if (nuevaEmpresa == null)
             {
-                Empresa empresa = _mapper.Map<Empresa>(oModel);
-                _db.Empresas.Add(empresa);
-                _db.SaveChanges();
-                respuesta.Exito = 1;
-                respuesta.Mensaje = "Empresa creada con éxito";
-                respuesta.Data = empresa;
+                respuesta.Mensaje = "Se debe ingresar los datos válidos";
+                return BadRequest(respuesta);
             }
-            catch (Exception ex)
+            else
             {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al crear la empresa: " + ex.Message;
-                return BadRequest();
-            }
-            return Ok(respuesta);
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult ActualizarEmpresa(int id, EmpresaRequest oModel)
-        {
-            Respuesta respuesta = new Respuesta();
-            Empresa empresa = _db.Empresas.FirstOrDefault(e => e.EmpresaId == id);
-            try
-            {
-                if (empresa != null)
-                {
-                    _mapper.Map(oModel, empresa);
-                    _db.Entry(empresa).State = EntityState.Modified;
-                    _db.SaveChanges();
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Empresa actualizada con éxito";
-                    //Traer lista actualizada
-                    respuesta.Data = empresa;
-                }
-                else
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "Empresa no encontrada";
-                }
-            }
-            catch (Exception ex)
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al actualizar la empresa: " + ex.Message;
+                respuesta = await _empresaService.Create(nuevaEmpresa);
             }
             return Ok(respuesta);
         }
         
-        [HttpDelete("{id}")]
-        public IActionResult EliminarEmpresa(int id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Respuesta>> Update(EmpresaDTO actualizarEmpresa, int id)
         {
             Respuesta respuesta = new Respuesta();
-            Empresa empresa = _db.Empresas.FirstOrDefault(e=>e.EmpresaId == id);
-            try{
-                if (empresa != null)
-                {
-                    _db.Empresas.Remove(empresa);
-                    _db.SaveChanges();
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Empresa eliminada con éxito";
-                }
-            }
-            catch (Exception ex)
+            
+            if (actualizarEmpresa == null && !IsValidId(id))
             {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al eliminar la empresa: " + ex.Message;
+                respuesta.Mensaje = "Se debe ingresar los datos válidos";
+                return BadRequest(respuesta);
+            }
+            else
+            {
+                respuesta = await _empresaService.Update(actualizarEmpresa, id);
             }
             return Ok(respuesta);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Respuesta>> Delete(int id)
+        {
+            Respuesta respuesta = new Respuesta();
+            if (!IsValidId(id))
+            {
+                respuesta.Exito = 0;
+                respuesta.Mensaje = "El ID no puede ser nulo.";
+                return BadRequest(respuesta);
+            }
+            respuesta.Mensaje = "Empresa eliminada con éxito";
+            respuesta.Exito = 1;
+            respuesta = await _empresaService.Delete(id);
+            return Ok(respuesta);
+        }
+
+        private bool IsValidId(int id)
+        {
+            return id > 0; // Por ejemplo, podría ser positivo para ser válido
+
         }
     }
 }

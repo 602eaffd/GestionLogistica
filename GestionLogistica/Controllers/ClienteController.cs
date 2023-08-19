@@ -1,6 +1,9 @@
-﻿using GestionLogistica.Models;
+﻿using AutoMapper;
+using GestionLogistica.Models;
+using GestionLogistica.Models.DTOs;
 using GestionLogistica.Models.Respuesta;
 using GestionLogistica.Models.ViewModels;
+using GestionLogistica.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,166 +11,105 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionLogistica.Controllers
 {
+    /*
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
+
     public class ClienteController : ControllerBase
     {
         private readonly GestionLogisticaContext _db;
+        private readonly IMapper _mapper;
+        private readonly ClienteService _clienteService;
 
-        public ClienteController(GestionLogisticaContext db)
+        public ClienteController(GestionLogisticaContext db, IMapper mapper, ClienteService clienteService)
         {
             _db = db;
+            _mapper = mapper;
+            _clienteService = clienteService;
         }
 
         [HttpGet]
-        public IActionResult ObtenerClientes()
+        [ProducesResponseType(typeof(Respuesta), StatusCodes.Status200OK)]
+        public async Task<ActionResult<Respuesta>> Get()
         {
             Respuesta respuesta = new Respuesta();
-            try
-            {
-                var listaClientes = _db.Clientes.ToList();
-
-                if (listaClientes != null)
-                {
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Clientes encontrados correctamente";
-                    respuesta.Data = listaClientes;
-                }
-            }
-            catch (Exception ex)
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al buscar los Clientes: " + ex.Message;
-                return BadRequest();
-            }
+            respuesta = await _clienteService.GetAll();
             return Ok(respuesta);
         }
 
         [HttpGet("{id}")]
-        public IActionResult ClientePorId(int id)
+        [ProducesResponseType(typeof(Respuesta), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Respuesta), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Cliente>> GetById(int id)
         {
             Respuesta respuesta = new Respuesta();
-            try
-            {
-                Cliente cliente = _db.Clientes.FirstOrDefault(c => c.ClienteId == id);
-                if(cliente != null)
-                {
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Cliente encontrado correctamente";
-                    respuesta.Data = cliente;
-                }
-                else
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "Cliente no encontrado";
-                }
-            }
-            catch (Exception ex)
+            if (!IsValidId(id))
             {
                 respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al buscar el Cliente: " + ex.Message;
-                return BadRequest();
-            }
-            return Ok(respuesta);
-        }
-        
-        [HttpPost]
-        public IActionResult CrearCliente(ClienteRequest oModel)
-        {
-            Respuesta respuesta = new Respuesta();
-            try
-            {
-                Cliente cliente = new Cliente();
-                cliente.Nombre = oModel.NombreCliente;
-                cliente.Direccion = oModel.Direccion;
-                cliente.Celular = oModel.Celular;
-                cliente.Correo = oModel.Correo;
-                cliente.EmpresaId = oModel.IdEmpresa;
-                _db.Clientes.Add(cliente); // Agrega el cliente a la base de datos
-                _db.SaveChanges(); // Guarda los cambios en la base de datos
-                respuesta.Exito = 1; // Indica que la operación se realizó con éxito
-                respuesta.Mensaje = "Cliente agregado exitosamente";
-                respuesta.Data = cliente;
-            }
-            catch (Exception ex)
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al registrar los Clientes: " + ex.Message;
+                respuesta.Mensaje = "El ID no puede ser nulo.";
                 return BadRequest(respuesta);
+            }
+            respuesta.Mensaje = "Empresa encontrada con éxito";
+            respuesta.Exito = 1;
+            var cliente = await _clienteService.GetById(id);
+            return Ok(cliente);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Respuesta>> Crear(ClienteDTO nuevaEmpresa)
+        {
+            Respuesta respuesta = new Respuesta();
+            if (nuevaEmpresa == null)
+            {
+                respuesta.Mensaje = "Se debe ingresar los datos válidos";
+                return BadRequest(respuesta);
+            }
+            else
+            {
+                respuesta = await _clienteService.Create(nuevaEmpresa);
             }
             return Ok(respuesta);
         }
 
         [HttpPut("{id}")]
-        public IActionResult ActualizarCliente(int id, ClienteRequest oModel)
+        public async Task<ActionResult<Respuesta>> Update(ClienteDTO actualizarCliente, int id)
         {
             Respuesta respuesta = new Respuesta();
-            try
-            {
-                Cliente cliente = _db.Clientes.FirstOrDefault(c => c.ClienteId == id);
-                if (cliente != null)
-                {
-                    cliente.Nombre = oModel.NombreCliente;
-                    cliente.Direccion = oModel.Direccion;
-                    cliente.Celular = oModel.Celular;
-                    cliente.Correo = oModel.Correo;
-                    cliente.EmpresaId = oModel.IdEmpresa;
 
-                    _db.Entry(cliente).State = EntityState.Modified;
-                    _db.SaveChanges();
-
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Cliente actualizado exitosamente";
-                    respuesta.Data = cliente;
-                }
-                else
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "Cliente no encontrado";
-                }
-            }
-            catch (Exception ex)
+            if (actualizarCliente == null && !IsValidId(id))
             {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al actualizar el Cliente: " + ex.Message;
+                respuesta.Mensaje = "Se debe ingresar los datos válidos";
                 return BadRequest(respuesta);
+            }
+            else
+            {
+                respuesta = await _clienteService.Update(actualizarCliente, id);
             }
             return Ok(respuesta);
         }
-
-
-
+        
         [HttpDelete("{id}")]
-        public IActionResult EliminarCliente(int id)
+        public async Task<ActionResult<Respuesta>> Delete(int id)
         {
             Respuesta respuesta = new Respuesta();
-            try
-            {
-                Cliente cliente = _db.Clientes.FirstOrDefault(c => c.ClienteId == id);
-                if (cliente != null)
-                {
-                    _db.Clientes.Remove(cliente);
-                    _db.SaveChanges();
-
-                    respuesta.Exito = 1;
-                    respuesta.Mensaje = "Cliente eliminado exitosamente";
-                }
-                else
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "Cliente no encontrado";
-                }
-            }
-            catch (Exception ex)
+            if (!IsValidId(id))
             {
                 respuesta.Exito = 0;
-                respuesta.Mensaje = "Ocurrió un error al eliminar el Cliente: " + ex.Message;
+                respuesta.Mensaje = "El ID no puede ser nulo.";
                 return BadRequest(respuesta);
             }
+            respuesta.Mensaje = "Empresa eliminada con éxito";
+            respuesta.Exito = 1;
+            respuesta = await _clienteService.Delete(id);
             return Ok(respuesta);
         }
+        
+        private bool IsValidId(int id)
+        {
+            return id > 0; // Por ejemplo, podría ser positivo para ser válido
 
-
-    }
+        }
+        
+    }*/
 }

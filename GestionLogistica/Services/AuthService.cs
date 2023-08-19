@@ -1,7 +1,9 @@
 ﻿using GestionLogistica.Common;
 using GestionLogistica.Models;
+using GestionLogistica.Models.DTOs;
 using GestionLogistica.Models.Respuesta;
 using GestionLogistica.Models.ViewModels;
+using GestionLogistica.Services.Interfaces;
 using GestionLogistica.Tools;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -11,18 +13,19 @@ using System.Text;
 
 namespace GestionLogistica.Services
 {
-    public class UserService : IUserService
+    
+    public class AuthService : IAuthService
     {
         private readonly AppSettings _appSettings;
         RespuestaUsuario userResponse = new RespuestaUsuario();
         private readonly GestionLogisticaContext _db;
-        public UserService(GestionLogisticaContext db, IOptions<AppSettings> appSettings)
+        public AuthService(GestionLogisticaContext db, IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
             _db = db;
         }
 
-        public RespuestaUsuario Auth(AuthRequest model)
+        public RespuestaUsuario Auth(AuthDTO model)
         {
             string spassword = Encrypt.GetSHA256(model.Contraseña);
             var usuarioBaseDatos = _db.Usuarios.Where(u => u.Email == model.Email && u.Contraseña == spassword).FirstOrDefault();

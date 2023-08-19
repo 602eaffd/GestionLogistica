@@ -1,6 +1,7 @@
-﻿using GestionLogistica.Models.Respuesta;
+﻿using GestionLogistica.Models.DTOs;
+using GestionLogistica.Models.Respuesta;
 using GestionLogistica.Models.ViewModels;
-using GestionLogistica.Services;
+using GestionLogistica.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,18 +10,18 @@ namespace GestionLogistica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     
-    public class UserController : ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IAuthService _userService;
 
-        public UserController(IUserService userService)
+        public AuthController(IAuthService userService)
         {
             _userService = userService; 
         }
         
         [HttpPost]
 
-        public IActionResult Autentificar([FromBody] AuthRequest user)
+        public IActionResult Autentificar([FromBody] AuthDTO user)
         {
             Respuesta respuesta = new Respuesta();
             try
