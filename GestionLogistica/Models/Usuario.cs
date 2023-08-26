@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace GestionLogistica.Models
 {
@@ -17,7 +19,7 @@ namespace GestionLogistica.Models
         public string? Rol { get; set; }
         public string Contraseña { get; set; } = null!;
         public string? Estado { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Gestionenvio> Gestionenvios { get; set; }
     }
 }

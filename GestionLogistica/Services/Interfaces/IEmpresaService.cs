@@ -7,7 +7,7 @@ namespace GestionLogistica.Services.Interfaces
     public interface IEmpresaService
     {
         Task<Respuesta> GetAll();
-        Task<Empresa?> GetById(int id);
+        Task<Respuesta>GetById (int id);
         Task<Respuesta> Create(EmpresaDTO nuevaEmpresa);
 
         Task<Respuesta> Update(EmpresaDTO empresaModel, int id);

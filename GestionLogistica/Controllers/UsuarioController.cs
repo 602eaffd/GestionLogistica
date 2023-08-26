@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GestionLogistica.Controllers
 {
-
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase
@@ -39,12 +39,6 @@ namespace GestionLogistica.Controllers
         public async Task<ActionResult<Gestionenvio>> GetById(int id)
         {
             Respuesta respuesta = new Respuesta();
-            /*if (!IsValidId(id))
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "El ID no puede ser nulo.";
-                return BadRequest(respuesta);
-            }*/
             var cliente = await _usuarioService.GetById(id);
             return Ok(cliente);
         }

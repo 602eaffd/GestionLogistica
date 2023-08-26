@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionLogistica.Controllers
 {
-    /*
+    
     [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
@@ -111,5 +111,5 @@ namespace GestionLogistica.Controllers
 
         }
         
-    }*/
+    }
 }

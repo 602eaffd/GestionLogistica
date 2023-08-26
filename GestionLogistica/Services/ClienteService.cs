@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionLogistica.Services
 {
-
+    
     public class ClienteService : IClienteService
     {
         public readonly GestionLogisticaContext _context;

@@ -24,6 +24,10 @@ namespace GestionLogistica.Models.ViewModels
         [Required]
         public string Propietario { get; set; } = string.Empty;
         [Required]
-        public int EmpresaId { get; set; } 
+        public int EmpresaId { get; set; }
+        [Required]
+        public string CurrentUser { get; set; } = string.Empty; 
+        [Required]
+        public string LastUser { get; set; } = string.Empty;
     }
 }

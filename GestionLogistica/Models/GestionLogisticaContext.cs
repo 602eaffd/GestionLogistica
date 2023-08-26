@@ -21,15 +21,7 @@ namespace GestionLogistica.Models
         public virtual DbSet<Equipo> Equipos { get; set; } = null!;
         public virtual DbSet<Gestionenvio> Gestionenvios { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
-        /*
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=SF-SVASQUEZ\\SQLEXPRESS;Database=GestionLogistica;Trusted_Connection=True;TrustServerCertificate=True");
-            }
-        }*/
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,7 +51,7 @@ namespace GestionLogistica.Models
                 entity.ToTable("empresa");
 
                 entity.Property(e => e.ContactoEmpresa)
-                    .HasMaxLength(50)
+                    .HasMaxLength(100)
                     .IsUnicode(false);
 
                 entity.Property(e => e.NombreEmpresa)
@@ -75,12 +67,20 @@ namespace GestionLogistica.Models
                     .HasMaxLength(20)
                     .IsUnicode(false);
 
+                entity.Property(e => e.CurrentUser)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Detalles)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Estado)
                     .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LastUser)
+                    .HasMaxLength(100)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Marca)
@@ -107,6 +107,7 @@ namespace GestionLogistica.Models
                 entity.HasOne(d => d.Empresa)
                     .WithMany(p => p.Equipos)
                     .HasForeignKey(d => d.EmpresaId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_equipo_empresa");
             });
 
@@ -116,8 +117,12 @@ namespace GestionLogistica.Models
 
                 entity.ToTable("gestionenvio");
 
-                entity.Property(e => e.Direccion)
-                    .HasMaxLength(100)
+                entity.Property(e => e.DireccionDestinatario)
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DireccionRemitente)
+                    .HasMaxLength(150)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Email)
@@ -139,6 +144,16 @@ namespace GestionLogistica.Models
                 entity.Property(e => e.Telefono)
                     .HasMaxLength(20)
                     .IsUnicode(false);
+
+                entity.Property(e => e.TipoEnvio)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Empresa)
+                    .WithMany(p => p.Gestionenvios)
+                    .HasForeignKey(d => d.EmpresaId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_gestionenvio_empresa");
 
                 entity.HasOne(d => d.Equipo)
                     .WithMany(p => p.Gestionenvios)

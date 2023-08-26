@@ -51,9 +51,40 @@ namespace GestionLogistica.Services
         }
 
 
-        public async Task<Empresa> GetById(int id)
+        public async Task<Respuesta> GetById(int id)
         {
-            return await _context.Empresas.FindAsync(id);
+            Respuesta respuesta = new Respuesta();
+
+            try
+            {
+                if (!IsValidId(id))
+                {
+                    respuesta.Exito = 0;
+                    respuesta.Mensaje = "El ID no puede ser nulo.";
+                }
+                else
+                {
+                    var gestionEnvio = await _context.Empresas.FindAsync(id);
+                    if (gestionEnvio != null)
+                    {
+                        respuesta.Exito = 1;
+                        respuesta.Mensaje = "Empresa encontrada correctamente";
+                        respuesta.Data = gestionEnvio;
+                    }
+                    else
+                    {
+                        respuesta.Exito = 0;
+                        respuesta.Mensaje = "No se encontró la empresa";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.Exito = 0;
+                respuesta.Mensaje = $"Ocurrió un error al buscar las gestiones: {ex}";
+
+            }
+            return respuesta;
         }
 
 
@@ -84,8 +115,8 @@ namespace GestionLogistica.Services
             Respuesta respuesta = new Respuesta();
             try
             {
-                var existeEmpresa = await GetById(id);
-                //var existeEmpresa = _context.Empresas.FirstOrDefault(e => e.EmpresaId == id);
+                //var existeEmpresa = await GetById(id);
+                var existeEmpresa = _context.Empresas.FirstOrDefault(e => e.EmpresaId == id);
                 if (existeEmpresa != null)
                 {
                     _mapper.Map(empresa, existeEmpresa); // Actualizar propiedades de la entidad existente
@@ -114,8 +145,8 @@ namespace GestionLogistica.Services
             Respuesta respuesta = new Respuesta();
             try
             {
-                var eliminarEmpresa = await GetById(id);
-                //var existeEmpresa = _context.Empresas.FirstOrDefault(e => e.EmpresaId == id);
+                //var eliminarEmpresa = await GetById(id);
+                var eliminarEmpresa = _context.Empresas.FirstOrDefault(e => e.EmpresaId == id);
                 if (eliminarEmpresa != null)
                 {
                     _context.Empresas.Remove(eliminarEmpresa);
@@ -137,33 +168,10 @@ namespace GestionLogistica.Services
             return respuesta;
         }
 
+        private bool IsValidId(int id)
+        {
+            return id > 0; // Por ejemplo, podría ser positivo para ser válido
 
-        /*
-public async Task<Empresa> Update(EmpresaDTO ActualizarEmpresa, int id)
-{
-   var empresa = await GetById(id);
-   if(empresa is not null)
-   {
-       _mapper.Map(ActualizarEmpresa, empresa);
-       _context.Entry(empresa).State = EntityState.Modified;
-       await _context.SaveChangesAsync();
-   }
-   else
-   {
-       throw new Exception("No se ha encontrado la empresa");
-   }        
-
-   return empresa;
-}
-public async Task Delete(int id)
-{
-   var eliminarEmpresa = await GetById(id);
-   if (eliminarEmpresa is not null)
-   {
-       _context.Empresas.Remove(eliminarEmpresa);
-       await _context.SaveChangesAsync();
-   }
-}*/
-
+        }
     }
 }

@@ -17,13 +17,14 @@ namespace GestionLogistica.Controllers
         //[Authorize]
         public class GestionEnvioController : ControllerBase
         {
-            private readonly GestionLogisticaContext _db;
+            private readonly GestionLogisticaContext _context;
             private readonly IMapper _mapper;
             private readonly GestionEnvioService _gestionEnvioService;
 
+
             public GestionEnvioController(GestionLogisticaContext db, IMapper mapper, GestionEnvioService gestionEnvioService)
             {
-                _db = db;
+                _context = db;
                 _mapper = mapper;
                 _gestionEnvioService = gestionEnvioService;
             }
@@ -43,17 +44,53 @@ namespace GestionLogistica.Controllers
             public async Task<ActionResult<Gestionenvio>> GetById(int id)
             {
                 Respuesta respuesta = new Respuesta();
-                /*if (!IsValidId(id))
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "El ID no puede ser nulo.";
-                    return BadRequest(respuesta);
-                }*/
                 var cliente = await _gestionEnvioService.GetById(id);
                 return Ok(cliente);
             }
 
-            [HttpPost]
+        [HttpGet("gestionesByFecha")]
+        public async Task<ActionResult<IEnumerable<DashboardDTO>>> GestionesPorFecha(
+        [FromQuery] DateTime fechaInicio,
+        [FromQuery] DateTime fechaFin,            [FromQuery] int numeroPagina = 1,
+        [FromQuery] int elementosPorPagina = 10)
+        {
+            try
+            {
+                var gestionesFiltradas = await _gestionEnvioService.GetGestionesFiltradasFecha(
+                    fechaInicio, fechaFin, numeroPagina, elementosPorPagina);
+
+                return Ok(gestionesFiltradas);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al obtener las gestiones: {ex.Message}");
+            }
+        }
+
+        [HttpGet("gestionesByEmpresa&Fecha")]
+        public async Task<ActionResult<IEnumerable<DashboardDTO>>> GestionesPorEmpresaFecha(
+            [FromQuery] DateTime fechaInicio,
+            [FromQuery] DateTime fechaFin,
+            [FromQuery] string nombreEmpresa,
+            [FromQuery] int numeroPagina = 1,
+            [FromQuery] int elementosPorPagina = 10)
+        {
+            try
+            {
+                var gestionesFiltradas = await _gestionEnvioService.GetGestionesFiltradasPorEmpresa(
+                    fechaInicio, fechaFin, nombreEmpresa, numeroPagina, elementosPorPagina);
+
+                return Ok(gestionesFiltradas);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Ocurrió un error al obtener las gestiones: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPost]
             public async Task<ActionResult<Respuesta>> Crear(GestionEnvioDTO nuevaGestionEnvio)
             {
                 Respuesta respuesta = new Respuesta();
@@ -69,12 +106,13 @@ namespace GestionLogistica.Controllers
                 return Ok(respuesta);
             }
         
+        /*
             [HttpPut("{id}")]
             public async Task<ActionResult<Respuesta>> Update(GestionEnvioDTO actualizarGestionEnvio, int id)
             {
                 Respuesta respuesta = new Respuesta();
 
-                if (actualizarGestionEnvio == null && !IsValidId(id))
+                if (actualizarGestionEnvio == null)
                 {
                     respuesta.Mensaje = "Se debe ingresar los datos válidos";
                     return BadRequest(respuesta);
@@ -85,8 +123,37 @@ namespace GestionLogistica.Controllers
                 }
                 return Ok(respuesta);
             }
+        */
 
-            [HttpDelete("{id}")]
+            [HttpPut("actualizarByEmpresa/{id}")]
+            public async Task<ActionResult<Respuesta>> Update(int id, [FromBody] DashboardActulizarGestionByEmpresaDTO gestionActualizada)
+            {
+                Respuesta respuesta = new Respuesta();
+
+                try
+                {
+                    respuesta = await _gestionEnvioService.UpdateGestion(id, gestionActualizada);
+
+                    if (respuesta.Exito == 1)
+                    {
+                        return Ok(respuesta);
+                    }
+                    else
+                    {
+                        return BadRequest(respuesta);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    respuesta.Exito = 0;
+                    respuesta.Mensaje = $"Ocurrió un error al actualizar la gestión:[ {ex} ]";
+                    return BadRequest(respuesta);
+                }
+            }
+
+
+
+        [HttpDelete("{id}")]
             public async Task<ActionResult<Respuesta>> Delete(int id)
             {
                 Respuesta respuesta = new Respuesta();
@@ -100,43 +167,8 @@ namespace GestionLogistica.Controllers
                 return id > 0; // Por ejemplo, podría ser positivo para ser válido
 
             }
-        /*
-        [HttpGet]
-        [Route("/FindDashboard")]
-        public IActionResult FindDashboard()
-        {
-            var clientes = _db.Clientes.ToList();
-            var usuarios = _db.Usuarios.ToList();
-            var equipos = _db.Equipos.ToList();
-            var gestionEnvios = _db.Gestionenvios.ToList();
-
-            List<DashboardDTO> dashboardData = new List<DashboardDTO>();
-            
-            foreach (var cliente in clientes)
-            {
-                var usuario = usuarios.FirstOrDefault(u => u.UsuarioId == cliente.ClienteId);
-                var equipo = equipos.FirstOrDefault(e => e.EquipoId == equipo.);
-                var gestionEnvio = gestionEnvios.FirstOrDefault(g => g.ClienteId == cliente.ClienteId && g.EquipoId == cliente.IdEquipo && g.UsuarioId == cliente.IdUsuario);
-
-                if (usuario != null && equipo != null && gestionEnvio != null)
-                {
-                    DashboardDTO dash = new DashboardDTO
-                    {
-                        NombreCliente = cliente.Nombre,
-                        SerialEquipo = equipo.Serial,
-                        NombreUsuario = usuario.Nombre,
-                        ValorAsegurado = gestionEnvio.MontoAsegurado
-                    };
-                    dashboardData.Add(dash);
-                }
-            }
-           
-            Respuesta respuesta = new Respuesta();
-            respuesta.Data = dashboardData;
-
-            return Ok(respuesta);
-        }
-        */
+       
+        
 
         
     }

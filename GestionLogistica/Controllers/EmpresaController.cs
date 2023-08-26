@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionLogistica.Controllers
 { 
+    
     [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
@@ -43,12 +44,6 @@ namespace GestionLogistica.Controllers
         public async Task<ActionResult<Empresa>> GetById(int id)
         {
             Respuesta respuesta = new Respuesta();
-         /* if (!IsValidId(id))
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "El ID no puede ser nulo.";
-                return BadRequest(respuesta);
-            }*/
             respuesta.Mensaje = "Empresa encontrada con éxito";
             respuesta.Exito = 1;
             var empresa = await _empresaService.GetById(id);

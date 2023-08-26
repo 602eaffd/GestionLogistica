@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace GestionLogistica.Models
 {
@@ -13,12 +14,19 @@ namespace GestionLogistica.Models
         public string Observaciones { get; set; } = null!;
         public double MontoAsegurado { get; set; }
         public bool Empaque { get; set; }
-        public string? NombreCliente { get; set; }
-        public string? Direccion { get; set; }
-        public string? Telefono { get; set; }
-        public string? Email { get; set; }
-
+        public string NombreCliente { get; set; } = null!;
+        public string Telefono { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string DireccionRemitente { get; set; } = null!;
+        public string DireccionDestinatario { get; set; } = null!;
+        public string TipoEnvio { get; set; } = null!;
+        public int NumeroTicket { get; set; }
+        public int EmpresaId { get; set; }
+        [JsonIgnore]
+        public virtual Empresa Empresa { get; set; } = null!;
+        [JsonIgnore]
         public virtual Equipo Equipo { get; set; } = null!;
+        [JsonIgnore]
         public virtual Usuario Usuario { get; set; } = null!;
     }
 }

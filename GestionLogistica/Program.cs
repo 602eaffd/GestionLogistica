@@ -50,13 +50,7 @@ builder.Services.AddSingleton(mapper); //Mapeo mismo para todos los que solicite
 builder.Services.AddMvc();
 
 
-/*
-var appSettingsSectionConnection = builder.Configuration.GetSection("ConnectionStrings");
-builder.Services.Configure<AppSettings>(appSettingsSectionConnection);
-var appSettingsConnection = appSettingsSectionConnection.Get<AppSettings>().GestionConnection;
-//var connection = appSettingsConnection.GestionConnection;
-builder.Services.AddSqlServer<GestionLogisticaContext>(appSettingsConnection);
-*/
+
 
 
 //4 - JWT 
