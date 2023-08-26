@@ -22,10 +22,11 @@ namespace GestionLogistica.Models
         public string TipoEnvio { get; set; } = null!;
         public int NumeroTicket { get; set; }
         public int EmpresaId { get; set; }
+        public bool ConfirmacionLlegada { get; set; }
         [JsonIgnore]
         public virtual Empresa Empresa { get; set; } = null!;
         [JsonIgnore]
-        public virtual Equipo Equipo { get; set; } = null!;
+        public virtual Equipo Equipo { get; set; } = null!; 
         [JsonIgnore]
         public virtual Usuario Usuario { get; set; } = null!;
     }

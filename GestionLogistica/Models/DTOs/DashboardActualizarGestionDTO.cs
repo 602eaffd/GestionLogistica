@@ -1,23 +1,48 @@
-﻿namespace GestionLogistica.Models.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GestionLogistica.Models.DTOs
 {
     public class DashboardActulizarGestionByEmpresaDTO
     {
+
         public int GestionId { get; set; }
-        public string SerialEquipo { get; set; }
-        public int UsuarioId { get; set; }
-        public DateTime FechaGestion { get; set; }
+        [Required]
         public DateTime FechaLlegada { get; set; }
-        public double MontoAsegurado { get; set; }
-        public bool Empaque { get; set; }
-        public string NombreCliente { get; set; }
-        public string DireccionRemitente { get; set; }
-        public string DireccionDestinatario { get; set; }
-        public string TipoEnvio { get; set; }
-        public int NumeroTicket { get; set; }
+        [Required]
+        public bool ConfirmacionLlegada { get; set; } = false;
+        [Required]
         public string EstadoEquipo { get; set; }
+        /*
+        [Required]
+        public string SerialEquipo { get; set; }
+        [Required]
+        public int UsuarioId { get; set; }
+        [Required]
+        public DateTime FechaGestion { get; set; }
+        [Required]
+        public DateTime FechaLlegada { get; set; }
+        [Required]
+        public double MontoAsegurado { get; set; }
+        [Required]
+        public bool Empaque { get; set; }
+        [Required]
+        public string CurrentUser { get; set; }
+        [Required]
+        public string DireccionRemitente { get; set; }
+        [Required]
+        public string DireccionDestinatario { get; set; }
+        [Required]
+        public string TipoEnvio { get; set; }
+        [Required]
+        public int NumeroTicket { get; set; }
+        [Required]
+        public string EstadoEquipo { get; set; }
+        [Required]
         public string Observaciones { get; set; }
+        [Required]
+        public bool ConfirmacionLlegada { get; set; } = false;
         //public string CurrentUser { get; set; }
-        public string LastUser { get; set; }
-        // public string NombreEmpresa { get; set; }
+        //public string LastUser { get; set; }
+        // public string NombreEmpresa { get; set; }*/
     }
 }

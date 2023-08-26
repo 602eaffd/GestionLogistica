@@ -1,4 +1,6 @@
-﻿namespace GestionLogistica.Models.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GestionLogistica.Models.DTOs
 {
     public class DashboardDTO
     {
@@ -17,5 +19,7 @@
         public string NombreEmpresa { get; set; }
         public string EstadoEquipo { get; set; }
         public string Observaciones { get; set; }
+        [Required]
+        public bool ConfirmacionLlegada { get; set; }
     }
 }

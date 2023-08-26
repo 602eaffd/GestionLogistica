@@ -36,6 +36,10 @@ namespace GestionLogistica.Models.DTOs
         public string TipoEnvio { get; set; } = string.Empty;
         [Required]
         public int NumeroTicket { get; set; }
+        [Required]
+        public bool ConfirmacionLlegada { get; set; } = false;
+        [Required]
+        public string EstadoEquipo { get; set; }
     }
 
 }

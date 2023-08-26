@@ -22,32 +22,7 @@ namespace GestionLogistica.Services
             _mapper = mapper;
         }
 
-       /*public async Task<Respuesta> Create(GestionEnvioDTO nuevaGestion)
-        {
-            Respuesta respuesta = new Respuesta();
-
-            try
-            {
-                if (!IsValidDto(nuevaGestion))
-                {
-                    respuesta.Exito = 0;
-                    respuesta.Mensaje = "Validar los datos ingresados";
-                }
-                Gestionenvio gestionEnvio = _mapper.Map<Gestionenvio>(nuevaGestion);
-                _context.Gestionenvios.Add(gestionEnvio);
-                await _context.SaveChangesAsync();
-                respuesta.Exito = 1;
-                respuesta.Mensaje = "Gestión de envío creada con éxito";
-                respuesta.Data = gestionEnvio;
-            }
-            catch (Exception ex)
-            {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = $"Ocurrió un error al crear la gestión: {ex}";
-
-            }
-            return respuesta;
-        }*/
+        /*
         public async Task<Respuesta> Create(GestionEnvioDTO nuevaGestion)
         {
             Respuesta respuesta = new Respuesta();
@@ -73,7 +48,59 @@ namespace GestionLogistica.Services
 
             }
             return respuesta;
+        }*/
+
+        public async Task<Respuesta> Create(GestionEnvioDTO nuevaGestion)
+        {
+            Respuesta respuesta = new Respuesta();
+
+            try
+            {
+                if (!IsValidDto(nuevaGestion))
+                {
+                    respuesta.Exito = 0;
+                    respuesta.Mensaje = "Validar los datos ingresados";
+                }
+                Gestionenvio gestionEnvio = _mapper.Map<Gestionenvio>(nuevaGestion);
+
+                // Obtener el equipo correspondiente
+                Equipo equipo = _context.Equipos.FirstOrDefault(e => e.EquipoId == nuevaGestion.EquipoId);
+                if (equipo != null)
+                {
+                    // Crear una nueva instancia de EquipoHistorialUsuario
+                    EquipoHistorialUsuario historialUsuario = new EquipoHistorialUsuario
+                    {
+                        EquipoId = equipo.EquipoId,
+                        Usuario = equipo.CurrentUser,
+                        FechaRegistro = DateTime.Now
+                    };
+
+                    //Actualizar estado de equipo 
+                    equipo.Estado = nuevaGestion.EstadoEquipo;
+                    // Agregar la instancia al historial de usuarios
+                    equipo.EquipoHistorialUsuarios.Add(historialUsuario);
+
+                    // Actualizar LastUser con el valor actual de CurrentUser
+                    equipo.LastUser = equipo.CurrentUser;
+
+                    // Actualizar CurrentUser con el valor de NombreCliente
+                    equipo.CurrentUser = nuevaGestion.NombreCliente;
+                }
+
+                _context.Gestionenvios.Add(gestionEnvio);
+                await _context.SaveChangesAsync();
+                respuesta.Exito = 1;
+                respuesta.Mensaje = "Gestión de envío creada con éxito";
+                respuesta.Data = gestionEnvio;
+            }
+            catch (Exception ex)
+            {
+                respuesta.Exito = 0;
+                respuesta.Mensaje = $"Ocurrió un error al crear la gestión: {ex}";
+            }
+            return respuesta;
         }
+
         public async Task<Respuesta> GetGestionesFiltradasFecha(DateTime fechaInicio, DateTime fechaFin, int numeroPagina = 1, int elementosPorPagina = 10)
         {
             Respuesta respuesta = new Respuesta();
@@ -98,7 +125,12 @@ namespace GestionLogistica.Services
                         TipoEnvio = g.TipoEnvio,
                         NumeroTicket = g.NumeroTicket,
                         EstadoEquipo = g.Equipo.Estado,
-                        NombreEmpresa = g.Empresa.NombreEmpresa
+                        NombreEmpresa = g.Empresa.NombreEmpresa,
+                        Observaciones = g.Observaciones,              
+                        ConfirmacionLlegada = g.ConfirmacionLlegada,
+
+                        //CurrentUser = g.Equipo.CurrentUser,
+                        //LastUser = g.Equipo.LastUser,
                     })
                     .ToList();
                 if (gestionesFiltradas != null && gestionesFiltradas.Count > 0)
@@ -147,8 +179,11 @@ namespace GestionLogistica.Services
                         TipoEnvio = g.TipoEnvio,
                         EstadoEquipo = g.Equipo.Estado,
                         NumeroTicket = g.NumeroTicket,
-                        CurrentUser = g.Equipo.CurrentUser,
-                        LastUser = g.Equipo.LastUser,
+                        ConfirmacionLlegada = g.ConfirmacionLlegada,
+                        //CurrentUser = g.Equipo.CurrentUser,
+                        //LastUser = g.Equipo.LastUser,
+                        Observaciones = g.Observaciones
+
 
                     })
                     .ToList();
@@ -191,19 +226,21 @@ namespace GestionLogistica.Services
                     }
 
                     // Actualiza los campos necesarios con los valores del DTO actualizado
-                    gestionExistente.Equipo.Serial = gestionActualizada.SerialEquipo;
-                    gestionExistente.UsuarioId = gestionActualizada.UsuarioId;
-                    gestionExistente.FechaGestion = gestionActualizada.FechaGestion;
+                    //gestionExistente.Equipo.Serial = gestionActualizada.SerialEquipo;
+                    //gestionExistente.UsuarioId = gestionActualizada.UsuarioId;
+                    //gestionExistente.FechaGestion = gestionActualizada.FechaGestion;
                     gestionExistente.FechaLlegada = gestionActualizada.FechaLlegada;
-                    gestionExistente.MontoAsegurado = gestionActualizada.MontoAsegurado;
-                    gestionExistente.Empaque = gestionActualizada.Empaque;
-                    gestionExistente.NombreCliente = gestionActualizada.NombreCliente;
-                    gestionExistente.DireccionRemitente = gestionActualizada.DireccionRemitente;
-                    gestionExistente.DireccionDestinatario = gestionActualizada.DireccionDestinatario;
-                    gestionExistente.TipoEnvio = gestionActualizada.TipoEnvio;
-                    gestionExistente.NumeroTicket = gestionActualizada.NumeroTicket;
-                    gestionExistente.Equipo.CurrentUser = gestionActualizada.NombreCliente;
-                    gestionExistente.Equipo.LastUser = gestionActualizada.LastUser;
+                    gestionExistente.ConfirmacionLlegada = gestionActualizada.ConfirmacionLlegada;
+                    //gestionExistente.Equipo.Estado = gestionActualizada.EstadoEquipo;
+                    //gestionExistente.MontoAsegurado = gestionActualizada.MontoAsegurado;
+                    //gestionExistente.Empaque = gestionActualizada.Empaque;
+                    //gestionExistente.NombreCliente = gestionActualizada.CurrentUser;
+                    //gestionExistente.DireccionRemitente = gestionActualizada.DireccionRemitente;
+                    //gestionExistente.DireccionDestinatario = gestionActualizada.DireccionDestinatario;
+                    //gestionExistente.TipoEnvio = gestionActualizada.TipoEnvio;
+                    //gestionExistente.NumeroTicket = gestionActualizada.NumeroTicket;
+                    //gestionExistente.Equipo.CurrentUser = gestionActualizada.CurrentUser;
+                    //gestionExistente.Equipo.LastUser = gestionActualizada.LastUser;
 
 
                     // Actualiza el estado del equipo si el campo NuevoEstadoEquipo tiene un valor

@@ -8,6 +8,7 @@ namespace GestionLogistica.Models
     {
         public Equipo()
         {
+            EquipoHistorialUsuarios = new HashSet<EquipoHistorialUsuario>();
             Gestionenvios = new HashSet<Gestionenvio>();
         }
 
@@ -26,6 +27,8 @@ namespace GestionLogistica.Models
         public string LastUser { get; set; } = null!;
         [JsonIgnore]
         public virtual Empresa Empresa { get; set; } = null!;
+        [JsonIgnore]
+        public virtual ICollection<EquipoHistorialUsuario> EquipoHistorialUsuarios { get; set; }
         [JsonIgnore]
         public virtual ICollection<Gestionenvio> Gestionenvios { get; set; }
     }
